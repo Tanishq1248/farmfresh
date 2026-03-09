@@ -54,7 +54,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         if (firebaseUser) {
           console.log('✅ User already logged in:', firebaseUser.email);
-          const isAdmin = firebaseUser.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+          // Case-insensitive email comparison for admin check
+          const isAdmin = firebaseUser.email?.toLowerCase() === process.env.NEXT_PUBLIC_ADMIN_EMAIL?.toLowerCase();
+          console.log('🔐 Admin check:', { email: firebaseUser.email, adminEmail: process.env.NEXT_PUBLIC_ADMIN_EMAIL, isAdmin });
           const newUser = {
             uid: firebaseUser.uid,
             email: firebaseUser.email,

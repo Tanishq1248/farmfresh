@@ -41,15 +41,15 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/30 z-30 md:hidden"
+          className="fixed inset-0 bg-black/30 z-30 md:hidden animate-fade-in"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed md:relative top-0 left-0 h-screen md:h-auto w-64 md:w-64 transform transition-transform duration-300 md:translate-x-0 z-40 md:z-0 flex flex-col ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        className={`fixed md:relative top-0 left-0 h-screen w-64 md:w-64 transform transition-smooth md:translate-x-0 z-40 md:z-0 flex flex-col ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         style={{ backgroundColor: 'transparent' }}
       >
@@ -62,7 +62,7 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             </h1>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="md:hidden p-1.5 hover:bg-green-200 rounded transition-colors text-gray-700"
+              className="md:hidden p-1.5 hover:bg-green-200 rounded transition-smooth text-gray-700 btn-press active:scale-90"
             >
               <X size={20} />
             </button>
@@ -101,7 +101,7 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             )}
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-pink-400 to-red-400 hover:from-pink-500 hover:to-red-500 text-white rounded-lg transition-all text-xs md:text-sm font-medium justify-center shadow-md"
+              className="w-full flex items-center gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-pink-400 to-red-400 hover:from-pink-500 hover:to-red-500 text-white rounded-lg transition-smooth text-xs md:text-sm font-medium justify-center shadow-md btn-press active:scale-95"
             >
               <LogOut size={16} className="md:size-4" />
               <span>Logout</span>
@@ -117,7 +117,7 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           <div className="flex items-center gap-2 md:gap-4 min-w-0">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="md:hidden p-2 hover:bg-green-100 rounded transition-colors text-gray-700 flex-shrink-0"
+              className="md:hidden p-2 hover:bg-green-100 rounded transition-smooth text-gray-700 flex-shrink-0 btn-press active:scale-90"
             >
               <Menu size={20} />
             </button>
