@@ -1,6 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { subscribeToPanicProducts, onAuthChange, signUp, signIn, logOut, getUserOrders, getAllOrders, signInWithGoogle, getUserCart, saveUserCart, clearUserCart, saveOrder } from '@/lib/firebase';
+import { subscribeToPanicProducts, subscribeToOffers, onAuthChange, signUp, signIn, logOut, getUserOrders, getAllOrders, signInWithGoogle, getUserCart, saveUserCart, clearUserCart, saveOrder, createOffer, updateOffer, deleteOffer } from '@/lib/firebase';
 
 const AppContext = createContext<any>(null);
 
@@ -10,36 +10,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [orders, setOrders] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
   const [products, setProducts] = useState<any[]>([]);
+  const [offers, setOffers] = useState<any[]>([]);
   const [authLoading, setAuthLoading] = useState(true);
-  const [offers, setOffers] = useState<any[]>([
-    { 
-      id: 1, 
-      title: 'Organic Fresh Vegetables', 
-      discount: '10% Off',
-      discountedPrice: '₹9 onwards',
-      image: 'https://images.unsplash.com/photo-1488459716781-6a232dcea67f?auto=format&fit=crop&q=80&w=800&h=400',
-      endDate: '2026-03-15',
-      description: 'Fresh organic vegetables at unbeatable prices'
-    }, 
-    { 
-      id: 2, 
-      title: 'Buy 2 Get 1 Free', 
-      discount: 'FREE Item',
-      discountedPrice: 'Save 33%',
-      image: 'https://images.unsplash.com/photo-1599599810694-b5ac4dd3edd6?auto=format&fit=crop&q=80&w=800&h=400',
-      endDate: '2026-03-20',
-      description: 'Limited time offer on selected items'
-    },
-    {
-      id: 3,
-      title: 'Fresh Fruits Special',
-      discount: '20% Off',
-      discountedPrice: '₹80 onwards',
-      image: 'https://images.unsplash.com/photo-1583882327277-fb5edd23e451?auto=format&fit=crop&q=80&w=800&h=400',
-      endDate: '2026-03-25',
-      description: 'Seasonal fresh fruits delivery'
-    }
-  ]);
   const [firebaseConnected, setFirebaseConnected] = useState(false);
   const [cartUnsubscribe, setCartUnsubscribe] = useState<(() => void) | null>(null);
 

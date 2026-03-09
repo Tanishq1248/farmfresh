@@ -166,6 +166,19 @@ export interface Product {
   updatedAt: number;
 }
 
+// Offer Interface
+export interface Offer {
+  id: string;
+  title: string;
+  discount: string;
+  discountedPrice?: string;
+  image?: string;
+  endDate: string;
+  description?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
 // Database References
 export const getProductsRef = () => {
   if (!app) initializeFirebase();
@@ -286,6 +299,105 @@ export const deleteProduct = async (productId: string) => {
     await remove(productRef);
   } catch (error) {
     console.error('Error deleting product:', error);
+    throw error;
+  }
+};
+
+// Real-time listener for offers
+export const subscribeToOffers = (callback: (offers: Offer[]) => void) => {
+  // Ensure Firebase is initialized
+  if (!app) initializeFirebase();
+  
+  if (!database) {
+    console.warn('Firebase database not initialized. Offers will not load from Firebase.');
+    callback([]);
+    return () => {}; // Return dummy unsubscribe function
+  }
+
+  const offersRef = getOffersRef();
+  
+  const unsubscribe = onValue(offersRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      const offersList = Object.entries(data).map(([id, offer]: any) => ({
+        id,
+        ...offer
+      })) as Offer[];
+      
+      callback(offersList);
+    } else {
+      callback([]);
+    }
+  }, (error) => {
+    console.error('Error fetching offers:', error);
+    callback([]);
+  });
+
+  return unsubscribe;
+};
+
+// Create a new offer
+export const createOffer = async (offer: Omit<Offer, 'id' | 'createdAt' | 'updatedAt'>) => {
+  try {
+    // Ensure Firebase is initialized
+    if (!app) initializeFirebase();
+    
+    if (!database) {
+      throw new Error('Firebase database not initialized. Please check your Firebase configuration and environment variables.');
+    }
+    
+    const newOfferRef = ref(database, `offers/${Date.now()}`);
+    const offerData = {
+      ...offer,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+    
+    await set(newOfferRef, offerData);
+    return { id: Date.now().toString(), ...offerData };
+  } catch (error) {
+    console.error('Error creating offer:', error);
+    throw error;
+  }
+};
+
+// Update an offer
+export const updateOffer = async (offerId: string, updates: Partial<Offer>) => {
+  try {
+    // Ensure Firebase is initialized
+    if (!app) initializeFirebase();
+    
+    if (!database) {
+      throw new Error('Firebase database not initialized. Please check your Firebase configuration and environment variables.');
+    }
+    
+    const offerRef = ref(database, `offers/${offerId}`);
+    const updateData = {
+      ...updates,
+      updatedAt: Date.now()
+    };
+    
+    await update(offerRef, updateData);
+  } catch (error) {
+    console.error('Error updating offer:', error);
+    throw error;
+  }
+};
+
+// Delete an offer
+export const deleteOffer = async (offerId: string) => {
+  try {
+    // Ensure Firebase is initialized
+    if (!app) initializeFirebase();
+    
+    if (!database) {
+      throw new Error('Firebase database not initialized. Please check your Firebase configuration and environment variables.');
+    }
+    
+    const offerRef = ref(database, `offers/${offerId}`);
+    await remove(offerRef);
+  } catch (error) {
+    console.error('Error deleting offer:', error);
     throw error;
   }
 };
