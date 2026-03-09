@@ -1,6 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { subscribeToPanicProducts, subscribeToOffers, onAuthChange, signUp, signIn, logOut, getUserOrders, getAllOrders, signInWithGoogle, getUserCart, saveUserCart, clearUserCart, saveOrder, createOffer, updateOffer, deleteOffer } from '@/lib/firebase';
+import { subscribeToPanicProducts, subscribeToOffers, onAuthChange, signUp, signIn, logOut, getUserOrders, getAllOrders, signInWithGoogle, getUserCart, saveUserCart, clearUserCart, saveOrder, createProduct, updateProduct, deleteProduct, createOffer, updateOffer, deleteOffer } from '@/lib/firebase';
 
 const AppContext = createContext<any>(null);
 
@@ -10,10 +10,12 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [orders, setOrders] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
   const [products, setProducts] = useState<any[]>([]);
-  const [offers, setOffers] = useState<any[]>([]);
   const [authLoading, setAuthLoading] = useState(true);
+  const [offers, setOffers] = useState<any[]>([]);
   const [firebaseConnected, setFirebaseConnected] = useState(false);
   const [cartUnsubscribe, setCartUnsubscribe] = useState<(() => void) | null>(null);
+  const [productsUnsubscribe, setProductsUnsubscribe] = useState<(() => void) | null>(null);
+  const [offersUnsubscribe, setOffersUnsubscribe] = useState<(() => void) | null>(null);
 
   // PERSISTENT AUTHENTICATION - Check if user is already logged in when app loads
   useEffect(() => {
@@ -109,11 +111,29 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         setProducts(firebaseProducts);
         setFirebaseConnected(true);
       });
+      
+      setProductsUnsubscribe(() => unsubscribe);
 
       return () => unsubscribe();
     } catch (error) {
       console.warn('Firebase not configured. Using local products.');
       setFirebaseConnected(false);
+    }
+  }, []);
+
+  // Subscribe to Firebase offers
+  useEffect(() => {
+    try {
+      const unsubscribe = subscribeToOffers((firebaseOffers) => {
+        console.log('🎁 Loaded offers from Firebase:', firebaseOffers.length);
+        setOffers(firebaseOffers);
+      });
+      
+      setOffersUnsubscribe(() => unsubscribe);
+
+      return () => unsubscribe();
+    } catch (error) {
+      console.warn('Firebase offers not configured.');
     }
   }, []);
 
@@ -193,6 +213,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const handleLogout = async () => {
     try {
       setAuthLoading(true);
+      console.log('🔄 Logging out...');
       
       // Save cart to Firebase before logging out
       if (user && user.uid && cart.length > 0) {
@@ -214,13 +235,19 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         }
       }
       
+      // Sign out from Firebase
       await logOut();
+      console.log('✅ Signed out from Firebase');
+      
+      // Clear local state
       setUser(null);
       setOrders([]);
       setCart([]);
+      setWishlist([]);
       localStorage.removeItem('user');
+      console.log('✅ Logout completed successfully');
     } catch (error) {
-      console.error('Error logging out:', error);
+      console.error('❌ Error logging out:', error);
       throw error;
     } finally {
       setAuthLoading(false);
@@ -324,32 +351,72 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Admin Product Management
-  const addProduct = (product: any) => {
-    const newProduct = { ...product, id: Date.now() };
-    setProducts((prev) => [newProduct, ...prev]);
+  // Admin Product Management - Now using Firebase
+  const addProduct = async (product: any) => {
+    try {
+      const newProduct = await createProduct(product);
+      console.log('✅ Product created and saved to Firebase:', newProduct.id);
+      setProducts((prev) => [newProduct, ...prev]);
+    } catch (error) {
+      console.error('❌ Error adding product:', error);
+      throw error;
+    }
   };
 
-  const updateProduct = (id: number, updatedProduct: any) => {
-    setProducts((prev) => prev.map((p) => p.id === id ? { ...p, ...updatedProduct } : p));
+  const updateProductLocal = async (id: number | string, updatedProduct: any) => {
+    try {
+      await updateProduct(id.toString(), updatedProduct);
+      console.log('✅ Product updated in Firebase:', id);
+      setProducts((prev) => prev.map((p) => p.id === id ? { ...p, ...updatedProduct } : p));
+    } catch (error) {
+      console.error('❌ Error updating product:', error);
+      throw error;
+    }
   };
 
-  const deleteProduct = (id: number) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+  const deleteProductLocal = async (id: number | string) => {
+    try {
+      await deleteProduct(id.toString());
+      console.log('✅ Product deleted from Firebase:', id);
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+    } catch (error) {
+      console.error('❌ Error deleting product:', error);
+      throw error;
+    }
   };
 
-  // Admin Offer Management
-  const addOffer = (offer: any) => {
-    const newOffer = { ...offer, id: Date.now() };
-    setOffers((prev) => [newOffer, ...prev]);
+  // Admin Offer Management - Now using Firebase
+  const addOffer = async (offer: any) => {
+    try {
+      const newOffer = await createOffer(offer);
+      console.log('✅ Offer created and saved to Firebase:', newOffer.id);
+      setOffers((prev) => [newOffer, ...prev]);
+    } catch (error) {
+      console.error('❌ Error adding offer:', error);
+      throw error;
+    }
   };
 
-  const updateOffer = (id: number, updatedOffer: any) => {
-    setOffers((prev) => prev.map((o) => o.id === id ? { ...o, ...updatedOffer } : o));
+  const updateOfferLocal = async (id: number | string, updatedOffer: any) => {
+    try {
+      await updateOffer(id.toString(), updatedOffer);
+      console.log('✅ Offer updated in Firebase:', id);
+      setOffers((prev) => prev.map((o) => o.id === id ? { ...o, ...updatedOffer } : o));
+    } catch (error) {
+      console.error('❌ Error updating offer:', error);
+      throw error;
+    }
   };
 
-  const deleteOffer = (id: number) => {
-    setOffers((prev) => prev.filter((o) => o.id !== id));
+  const deleteOfferLocal = async (id: number | string) => {
+    try {
+      await deleteOffer(id.toString());
+      console.log('✅ Offer deleted from Firebase:', id);
+      setOffers((prev) => prev.filter((o) => o.id !== id));
+    } catch (error) {
+      console.error('❌ Error deleting offer:', error);
+      throw error;
+    }
   };
 
   return (
@@ -370,9 +437,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       // Orders
       orders, placeOrder,
       // Products
-      products, addProduct, updateProduct, deleteProduct, setProducts,
+      products, addProduct, updateProduct: updateProductLocal, deleteProduct: deleteProductLocal, setProducts,
       // Offers
-      offers, addOffer, updateOffer, deleteOffer,
+      offers, addOffer, updateOffer: updateOfferLocal, deleteOffer: deleteOfferLocal,
       // Firebase
       firebaseConnected
     }}>

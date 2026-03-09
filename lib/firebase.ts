@@ -166,19 +166,6 @@ export interface Product {
   updatedAt: number;
 }
 
-// Offer Interface
-export interface Offer {
-  id: string;
-  title: string;
-  discount: string;
-  discountedPrice?: string;
-  image?: string;
-  endDate: string;
-  description?: string;
-  createdAt: number;
-  updatedAt: number;
-}
-
 // Database References
 export const getProductsRef = () => {
   if (!app) initializeFirebase();
@@ -303,37 +290,56 @@ export const deleteProduct = async (productId: string) => {
   }
 };
 
-// Real-time listener for offers
+// Offer Interface
+export interface Offer {
+  id: string | number;
+  title: string;
+  description?: string;
+  discount: string;
+  discountedPrice?: string;
+  endDate: string;
+  image?: string;
+  createdAt?: number;
+  updatedAt?: number;
+}
+
+// Subscribe to offers in real-time
 export const subscribeToOffers = (callback: (offers: Offer[]) => void) => {
-  // Ensure Firebase is initialized
-  if (!app) initializeFirebase();
-  
-  if (!database) {
-    console.warn('Firebase database not initialized. Offers will not load from Firebase.');
-    callback([]);
-    return () => {}; // Return dummy unsubscribe function
-  }
-
-  const offersRef = getOffersRef();
-  
-  const unsubscribe = onValue(offersRef, (snapshot) => {
-    if (snapshot.exists()) {
-      const data = snapshot.val();
-      const offersList = Object.entries(data).map(([id, offer]: any) => ({
-        id,
-        ...offer
-      })) as Offer[];
-      
-      callback(offersList);
-    } else {
+  try {
+    // Ensure Firebase is initialized
+    if (!app) initializeFirebase();
+    
+    if (!database) {
+      console.warn('Firebase database not initialized. Offers will not load from Firebase.');
       callback([]);
+      return () => {};
     }
-  }, (error) => {
-    console.error('Error fetching offers:', error);
+    
+    const offersRef = getOffersRef();
+    
+    const unsubscribe = onValue(offersRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const offersList = Object.entries(data).map(([id, offer]: any) => ({
+          id,
+          ...offer
+        })) as Offer[];
+        
+        callback(offersList);
+      } else {
+        callback([]);
+      }
+    }, (error) => {
+      console.error('Error fetching offers:', error);
+      callback([]);
+    });
+    
+    return unsubscribe;
+  } catch (error) {
+    console.error('Error subscribing to offers:', error);
     callback([]);
-  });
-
-  return unsubscribe;
+    return () => {};
+  }
 };
 
 // Create a new offer
@@ -346,7 +352,8 @@ export const createOffer = async (offer: Omit<Offer, 'id' | 'createdAt' | 'updat
       throw new Error('Firebase database not initialized. Please check your Firebase configuration and environment variables.');
     }
     
-    const newOfferRef = ref(database, `offers/${Date.now()}`);
+    const offerId = Date.now().toString();
+    const newOfferRef = ref(database, `offers/${offerId}`);
     const offerData = {
       ...offer,
       createdAt: Date.now(),
@@ -354,7 +361,7 @@ export const createOffer = async (offer: Omit<Offer, 'id' | 'createdAt' | 'updat
     };
     
     await set(newOfferRef, offerData);
-    return { id: Date.now().toString(), ...offerData };
+    return { id: offerId, ...offerData };
   } catch (error) {
     console.error('Error creating offer:', error);
     throw error;
