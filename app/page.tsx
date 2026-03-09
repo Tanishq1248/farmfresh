@@ -54,56 +54,6 @@ const HeroBanner = () => {
 
   return (
     <div className="relative rounded-2xl md:rounded-3xl mx-4 md:mx-6 my-4 md:my-6 overflow-hidden h-32 sm:h-40 md:h-48 group">
-      <style>{`
-        @keyframes slideInRight {
-          from {
-            opacity: 0;
-            transform: translateX(100px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        @keyframes slideInLeft {
-          from {
-            opacity: 0;
-            transform: translateX(-100px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        @keyframes bounce {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-5px);
-          }
-        }
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-slide-in-right {
-          animation: slideInRight 0.6s ease-out;
-        }
-        .animate-bounce-gentle {
-          animation: bounce 2s ease-in-out infinite;
-        }
-        .animate-fade-up {
-          animation: fadeInUp 0.6s ease-out;
-        }
-      `}</style>
-
       {/* Background gradient - yellow to green */}
       <div
         className="absolute inset-0 transition-opacity duration-500"
@@ -333,28 +283,6 @@ const FreshPicks = () => {
           className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 animate-fade-in"
           onClick={() => setSelectedProduct(null)}
         >
-          <style>{`
-            @keyframes slideUp {
-              from {
-                opacity: 0;
-                transform: translateY(20px) scale(0.95);
-              }
-              to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-              }
-            }
-            @keyframes fadeIn {
-              from { opacity: 0; }
-              to { opacity: 1; }
-            }
-            .animate-fade-in {
-              animation: fadeIn 0.2s ease-out;
-            }
-            .animate-slide-up {
-              animation: slideUp 0.3s ease-out;
-            }
-          `}</style>
           <div
             className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-slide-up"
             onClick={(e) => e.stopPropagation()}
