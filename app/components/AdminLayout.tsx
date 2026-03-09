@@ -14,13 +14,13 @@ import {
 import { useState } from 'react';
 
 export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
-  const { logout, user } = useAppContext();
+  const { handleLogout, user } = useAppContext();
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogoutClick = async () => {
+    await handleLogout();
     router.push('/');
   };
 
@@ -100,7 +100,7 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               </div>
             )}
             <button
-              onClick={handleLogout}
+              onClick={handleLogoutClick}
               className="w-full flex items-center gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-pink-400 to-red-400 hover:from-pink-500 hover:to-red-500 text-white rounded-lg transition-smooth text-xs md:text-sm font-medium justify-center shadow-md btn-press active:scale-95"
             >
               <LogOut size={16} className="md:size-4" />
